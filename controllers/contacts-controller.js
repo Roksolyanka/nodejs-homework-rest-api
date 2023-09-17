@@ -2,10 +2,32 @@ import Contact from "../models/Contact.js";
 import { HttpError } from "../helpers/index.js";
 import { ctrlWrapper } from "../decorators/index.js";
 
+// !------------------------------------GET ALL-----------------------------------
+
 const getAll = async (req, res) => {
-  const result = await Contact.find();
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 20, favorite } = req.query;
+  const skip = (page - 1) * limit;
+  const filter = { owner };
+  
+  if (favorite === "true") {
+    filter.favorite = true;
+  } else if (favorite === "false") {
+    filter.favorite = false;
+  }
+
+  const result = await Contact.find(
+    filter,
+    "-createdAt -updatedAt",
+    {
+      skip,
+      limit,
+    }
+  ).populate("owner", "email subscription");
   res.json(result);
 };
+
+// !------------------------------------GET BY ID-----------------------------------
 
 const getById = async (req, res) => {
   const { contactId } = req.params;
@@ -16,10 +38,15 @@ const getById = async (req, res) => {
   res.json(result);
 };
 
+// !------------------------------------ADD-----------------------------------
+
 const add = async (req, res) => {
-  const result = await Contact.create(req.body);
+  const { _id: owner } = req.user;
+  const result = await Contact.create({ ...req.body, owner });
   res.status(201).json(result);
 };
+
+// !------------------------------------DELETE BY ID-----------------------------------
 
 const deleteById = async (req, res) => {
   const { contactId } = req.params;
@@ -29,6 +56,8 @@ const deleteById = async (req, res) => {
   }
   res.json({ message: "Contact deleted" });
 };
+
+// !------------------------------------UPDATE-----------------------------------
 
 const update = async (req, res) => {
   const { contactId } = req.params;
@@ -40,6 +69,8 @@ const update = async (req, res) => {
   }
   res.json(result);
 };
+
+// !------------------------------------UPDATE STATUS CONTACT-----------------------------------
 
 const updateStatusContact = async (req, res) => {
   const { contactId } = req.params;

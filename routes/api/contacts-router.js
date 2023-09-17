@@ -14,20 +14,15 @@ const router = express.Router();
 router.use(authenticate);
 
 router.get("/", contactsController.getAll);
-
 router.get("/:contactId", isValidId, contactsController.getById);
-
 router.post("/", contactAddValidate, contactsController.add);
-
 router.delete("/:contactId", isValidId, contactsController.deleteById);
-
 router.put(
   "/:contactId",
   isValidId,
   contactAddValidate,
   contactsController.update
 );
-
 router.patch(
   "/:contactId/favorite",
   isValidId,

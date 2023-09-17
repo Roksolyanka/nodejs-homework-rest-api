@@ -22,7 +22,7 @@ const userSchema = new Schema(
       enum: ["starter", "pro", "business"],
       default: "starter",
     },
-    token: String,
+    token: { type: String },
   },
   { versionKey: false, timestamps: true }
 );
@@ -42,9 +42,9 @@ export const userSignInSchema = Joi.object({
   password: Joi.string().min(6).required(),
 });
 
-// export const subscriptionSchema = Joi.object({
-//   subscription: Joi.string().valid("starter", "pro", "business").required(),
-// });
+export const userUpdateSubscriptionSchema = Joi.object({
+  subscription: Joi.string().valid("starter", "pro", "business").required().messages({ "any.only": "Invalid subscription type" }),
+});
 
 const User = model("user", userSchema);
 
