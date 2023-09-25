@@ -23,6 +23,7 @@ const userSchema = new Schema(
       default: "starter",
     },
     token: { type: String },
+    avatarURL: { type: String },
   },
   { versionKey: false, timestamps: true }
 );
@@ -43,7 +44,10 @@ export const userSignInSchema = Joi.object({
 });
 
 export const userUpdateSubscriptionSchema = Joi.object({
-  subscription: Joi.string().valid("starter", "pro", "business").required().messages({ "any.only": "Invalid subscription type" }),
+  subscription: Joi.string()
+    .valid("starter", "pro", "business")
+    .required()
+    .messages({ "any.only": "Invalid subscription type" }),
 });
 
 const User = model("user", userSchema);
