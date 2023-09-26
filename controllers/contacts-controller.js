@@ -1,5 +1,6 @@
+import fs from "fs/promises";
 import Contact from "../models/Contact.js";
-import { HttpError } from "../helpers/index.js";
+import { HttpError, cloudinary } from "../helpers/index.js";
 import { ctrlWrapper } from "../decorators/index.js";
 
 // !------------------------------------GET ALL-----------------------------------
@@ -9,21 +10,17 @@ const getAll = async (req, res) => {
   const { page = 1, limit = 20, favorite } = req.query;
   const skip = (page - 1) * limit;
   const filter = { owner };
-  
+
   if (favorite === "true") {
     filter.favorite = true;
   } else if (favorite === "false") {
     filter.favorite = false;
   }
 
-  const result = await Contact.find(
-    filter,
-    "-createdAt -updatedAt",
-    {
-      skip,
-      limit,
-    }
-  ).populate("owner", "email subscription");
+  const result = await Contact.find(filter, "-createdAt -updatedAt", {
+    skip,
+    limit,
+  }).populate("owner", "email subscription");
   res.json(result);
 };
 
@@ -42,7 +39,12 @@ const getById = async (req, res) => {
 
 const add = async (req, res) => {
   const { _id: owner } = req.user;
-  const result = await Contact.create({ ...req.body, owner });
+  const { path: oldPath } = req.file;
+  const { url: photoURL } = await cloudinary.uploader.upload(oldPath, {
+    folder: "photos",
+  });
+  await fs.unlink(oldPath);
+  const result = await Contact.create({ ...req.body, photoURL, owner });
   res.status(201).json(result);
 };
 
